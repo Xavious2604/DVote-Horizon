@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVote Horizon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link rel="shortcut icon" href="Dvote.png" type="image/x-icon">
+    <style>
+        :root {
+            --primary: #6D4E8C;
+            --secondary: #3F2A56;
+            --accent: #D3C4E3;
+            --background-light: #F5F5F5;
+            --background-dark: #1E1A2A;
+            --card-bg-light: rgba(211, 196, 227, 0.9);
+            --card-bg-dark: rgba(63, 42, 86, 0.9);
+            --text-light: #1A1A1A;
+            --text-dark: #FFFFFF;
+            --gradient: linear-gradient(135deg, #D3C4E3 0%, #6D4E8C 50%, #3F2A56 100%);
+            --shadow: 0 8px 32px rgba(63, 42, 86, 0.3);
+            --glass-bg: rgba(211, 196, 227, 0.3);
+            --glass-border: 1px solid rgba(211, 196, 227, 0.2);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--background-light);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        body.dark-mode {
+            background: var(--background-dark);
+            color: var(--text-dark);
+        }
+
+        #background-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            opacity: 0.8;
+        }
+
+        .wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .title {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin: 0;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            font-weight: 400;
+            color: var(--primary);
+            margin: 10px 0 0;
+        }
+
+        body.dark-mode .subtitle {
+            color: var(--accent);
+        }
+
+        .container {
+            background: var(--card-bg-light);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: var(--glass-border);
+        }
+
+        body.dark-mode .container {
+            background: var(--card-bg-dark);
+        }
+
+        .container-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .container-header i {
+            font-size: 1.5em;
+            color: var(--primary);
+            margin-right: 10px;
+        }
+
+        body.dark-mode .container-header i {
+            color: var(--accent);
+        }
+
+        .container-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin: 0;
+            color: var(--primary);
+        }
+
+        body.dark-mode .container-title {
+            color: var(--accent);
+        }
+
+        .container-body {
+            padding: 0 10px;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(63, 42, 86, 0.5);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .wallet-section {
+            text-align: center;
+        }
+
+        .connected-address {
+            margin-top: 15px;
+            font-size: 1em;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        body.dark-mode .connected-address {
+            color: var(--accent);
+        }
+
+        .address-text {
+            font-family: monospace;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            text-align: center;
+        }
+
+        .status.info {
+            background: rgba(0, 123, 255, 0.1);
+            color: #007bff;
+            border: 1px solid #007bff;
+        }
+
+        .status.success {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            border: 1px solid #28a745;
+        }
+
+        .status.warning {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+            border: 1px solid #ffc107;
+        }
+
+        .status.error {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+
+        body.dark-mode .form-group label {
+            color: var(--accent);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .form-group input {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-dark);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 5px rgba(63, 42, 86, 0.5);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--glass-bg);
+            border: var(--glass-border);
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            color: var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .theme-toggle {
+            color: var(--accent);
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        body.dark-mode .theme-toggle:hover {
+            background: var(--accent);
+            color: var(--background-dark);
+        }
+
+        .language-toggle {
+            position: fixed;
+            top: 20px;
+            right: 70px;
+            background: var(--glass-bg);
+            border: var(--glass-border);
+            padding: 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            color: var(--primary);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .language-toggle {
+            color: var(--accent);
+        }
+
+        .language-toggle:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        body.dark-mode .language-toggle:hover {
+            background: var(--accent);
+            color: var(--background-dark);
+        }
+
+        .language-dropdown {
+            display: none;
+            position: absolute;
+            top: 40px;
+            right: 0;
+            background: var(--card-bg-light);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 10px;
+            z-index: 1001;
+        }
+
+        body.dark-mode .language-dropdown {
+            background: var(--card-bg-dark);
+        }
+
+        .language-option {
+            padding: 5px 10px;
+            cursor: pointer;
+            color: var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .language-option {
+            color: var(--accent);
+        }
+
+        .language-option:hover {
+            background: var(--primary);
+            color: white;
+            border-radius: 4px;
+        }
+
+        body.dark-mode .language-option:hover {
+            background: var(--accent);
+            color: var(--background-dark);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--primary);
+        }
+
+        body.dark-mode .loading {
+            color: var(--accent);
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: var(--primary);
+        }
+
+        body.dark-mode .empty-state {
+            color: var(--accent);
+        }
+
+        .empty-state i {
+            font-size: 2em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .candidate-card, .voter-card, .result-card {
+            background: var(--glass-bg);
+            border: var(--glass-border);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .candidate-card:hover, .voter-card:hover, .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(63, 42, 86, 0.4);
+        }
+
+        .candidate-header, .voter-header, .result-header {
+            margin-bottom: 10px;
+        }
+
+        .candidate-name, .voter-name, .result-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        body.dark-mode .candidate-name,
+        body.dark-mode .voter-name,
+        body.dark-mode .result-name {
+            color: var(--accent);
+        }
+
+        .candidate-body, .voter-body, .result-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .voter-address {
+            font-family: monospace;
+            color: var(--text-light);
+        }
+
+        body.dark-mode .voter-address {
+            color: var(--text-dark);
+        }
+
+        .vote-button {
+            width: 100%;
+        }
+
+        .vote-button.already-voted {
+            background: #6c757d;
+        }
+
+        .vote-button.not-registered {
+            background: #dc3545;
+        }
+
+        .card-selected {
+            border: 2px solid var(--primary);
+            background: rgba(109, 78, 140, 0.2);
+        }
+
+        body.dark-mode .card-selected {
+            border-color: var(--accent);
+            background: rgba(211, 196, 227, 0.2);
+        }
+
+        .results-list, .voters-list {
+            margin-top: 15px;
+        }
+
+        .vote-count {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        body.dark-mode .vote-count {
+            color: var(--accent);
+        }
+
+        .vote-percentage {
+            font-size: 0.9em;
+            color: var(--text-light);
+        }
+
+        body.dark-mode .vote-percentage {
+            color: var(--text-dark);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        body.dark-mode .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.5s ease;
+        }
+
+        body.dark-mode .progress {
+            background: var(--accent);
+        }
+
+        .success-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .success-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .error-toast {
+            background: #dc3545;
+        }
+
+        .warning-toast {
+            background: #ffc107;
+            color: var(--text-light);
+        }
+
+        .info-toast {
+            background: #007bff;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: var(--card-bg-light);
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            text-align: center;
+        }
+
+        body.dark-mode .modal-content {
+            background: var(--card-bg-dark);
+        }
+
+        .modal-content h3 {
+            color: var(--primary);
+            margin: 0 0 15px;
+        }
+
+        body.dark-mode .modal-content h3 {
+            color: var(--accent);
+        }
+
+        .modal-content p {
+            margin: 0 0 20px;
+            color: var(--text-light);
+        }
+
+        body.dark-mode .modal-content p {
+            color: var(--text-dark);
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .badge {
+            background: var(--secondary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            margin-left: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        body.dark-mode .badge {
+            background: var(--accent);
+            color: var(--background-dark);
+        }
+    </style>
+</head>
+<body>
+    <video autoplay muted loop id="background-video">
+        <source src="bg.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-moon"></i>
+    </button>
+    <div class="language-toggle" onclick="toggleLanguageDropdown()">
+        Translator <i class="fas fa-caret-down"></i>
+        <div class="language-dropdown">
+            <div class="language-option" onclick="changeLanguage('en')">English</div>
+            <div class="language-option" onclick="changeLanguage('hi')">Hindi</div>
+            <div class="language-option" onclick="changeLanguage('mr')">Marathi</div>
+            <div class="language-option" onclick="changeLanguage('ta')">Tamil</div>
+        </div>
+    </div>
+    <div class="wrapper">
+        <header class="header animate__animated animate__fadeIn">
+            <img src="Dvote.png" alt="DVote Horizon" height="150px" width="200px"><h1 class="title">DVote Horizon</h1>
+            <p class="subtitle">Democracy in Every Block</p>
+        </header>
+        
+        <div class="container animate__animated animate__fadeInUp" id="walletSection">
+            <div class="container-header">
+                <i class="fas fa-wallet"></i>
+                <h2 class="container-title">Wallet Connection</h2>
+            </div>
+            <div class="container-body wallet-section">
+                <button id="connectWallet" class="btn btn-primary" title="Connect your MetaMask wallet to proceed">
+                    <i class="fas fa-plug"></i> Connect Your Wallet
+                </button>
+                <div class="connected-address hidden" id="connectedAddress">
+                    <i class="fas fa-check-circle"></i> Connected: 
+                    <span class="address-text" id="userAddress"></span>
+                </div>
+                <div id="networkInfo" class="status info hidden">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Please connect to the Sepolia testnet to use this application.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="container animate__animated animate__fadeInUp hidden" id="voterRegistrationSection">
+            <div class="container-header">
+                <i class="fas fa-user-check"></i>
+                <h2 class="container-title">Voter Registration</h2>
+            </div>
+            <div class="container-body">
+                <div class="form-group">
+                    <label for="voterName">Voter Name:</label>
+                    <input type="text" id="voterName" placeholder="Enter voter name">
+                </div>
+                <div class="form-group">
+                    <label for="voterAddress">Voter Address:</label>
+                    <input type="text" id="voterAddress" placeholder="Enter voter address (0x...)">
+                </div>
+                <button id="registerVoterBtn" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Register Voter
+                </button>
+                <div id="voterRegistrationStatus" class="status hidden"></div>
+            </div>
+        </div>
+
+        <div class="container animate__animated animate__fadeInUp hidden" id="adminSection">
+            <div class="container-header">
+                <i class="fas fa-user-shield"></i>
+                <h2 class="container-title">Admin Panel</h2>
+            </div>
+            <div class="container-body">
+                <div class="form-group">
+                    <label for="candidateName">Candidate Name:</label>
+                    <input type="text" id="candidateName" placeholder="Enter candidate name">
+                </div>
+                <button id="addCandidateBtn" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i> Add Candidate
+                </button>
+                <div id="addCandidateStatus" class="status hidden"></div>
+            </div>
+        </div>
+
+        <div class="container animate__animated animate__fadeInUp hidden" id="votingSection">
+            <div class="container-header">
+                <i class="fas fa-vote-yea"></i>
+                <h2 class="container-title">Cast Your Vote</h2>
+            </div>
+            <div class="container-body">
+                <div id="candidatesList">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i> Loading candidates...
+                    </div>
+                </div>
+                <div id="votingStatus" class="status hidden"></div>
+            </div>
+        </div>
+
+        <div class="container animate__animated animate__fadeInUp hidden" id="votersSection">
+            <div class="container-header">
+                <i class="fas fa-users"></i>
+                <h2 class="container-title">Registered Voters</h2>
+            </div>
+            <div class="container-body">
+                <button id="refreshVotersBtn" class="btn btn-primary">
+                    <i class="fas fa-sync-alt"></i> Refresh Voters
+                </button>
+                <div id="votersList" class="voters-list">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i> Loading voters...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container animate__animated animate__fadeInUp hidden" id="resultsSection">
+            <div class="container-header">
+                <i class="fas fa-chart-bar"></i>
+                <h2 class="container-title">Live Results</h2>
+            </div>
+            <div class="container-body">
+                <button id="refreshResultsBtn" class="btn btn-primary">
+                    <i class="fas fa-sync-alt"></i> Refresh Results
+                </button>
+                <div id="resultsList" class="results-list">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i> Loading results...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="success-toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Success!</span>
+    </div>
+
+    <div id="voteModal" class="modal">
+        <div class="modal-content">
+            <h3>Confirm Your Vote</h3>
+            <p>Are you sure you want to vote for <span id="modalCandidateName"></span>? This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="confirmVote()">Confirm</button>
+                <button class="btn btn-success" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const icon = document.querySelector('.theme-toggle i');
+            icon.classList.toggle('fa-moon');
+            icon.classList.toggle('fa-sun');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        }
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.querySelector('.theme-toggle i').classList.replace('fa-moon', 'fa-sun');
+        }
+
+        let currentLanguage = 'en';
+
+        const translations = {
+            en: {
+                title: 'DVote Horizon',
+                subtitle: 'Democracy in Every Block',
+                walletConnection: 'Wallet Connection',
+                connectWallet: 'Connect Your Wallet',
+                voterRegistration: 'Voter Registration',
+                voterNameLabel: 'Voter Name:',
+                voterAddressLabel: 'Voter Address:',
+                registerVoter: 'Register Voter',
+                adminPanel: 'Admin Panel',
+                candidateNameLabel: 'Candidate Name:',
+                addCandidate: 'Add Candidate',
+                castVote: 'Cast Your Vote',
+                registeredVoters: 'Registered Voters',
+                refreshVoters: 'Refresh Voters',
+                liveResults: 'Live Results',
+                refreshResults: 'Refresh Results',
+                confirmVote: 'Confirm Your Vote',
+                confirm: 'Confirm',
+                cancel: 'Cancel',
+                alreadyVoted: 'Already Voted',
+                vote: 'Vote',
+                notRegistered: 'Not Registered'
+            },
+            hi: {
+                title: 'डीवोट होराइजन',
+                subtitle: 'हर ब्लॉक में लोकतंत्र',
+                walletConnection: 'वॉलेट कनेक्शन',
+                connectWallet: 'अपना वॉलेट कनेक्ट करें',
+                voterRegistration: 'मतदाता पंजीकरण',
+                voterNameLabel: 'मतदाता का नाम:',
+                voterAddressLabel: 'मतदाता पता:',
+                registerVoter: 'मतदाता पंजीकृत करें',
+                adminPanel: 'प्रशासन पैनल',
+                candidateNameLabel: 'उम्मीदवार का नाम:',
+                addCandidate: 'उम्मीदवार जोड़ें',
+                castVote: 'अपना वोट डालें',
+                registeredVoters: 'पंजीकृत मतदाता',
+                refreshVoters: 'मतदाताओं को ताज़ा करें',
+                liveResults: 'लाइव परिणाम',
+                refreshResults: 'परिणाम ताज़ा करें',
+                confirmVote: 'अपना वोट पुष्टि करें',
+                confirm: 'पुष्टि करें',
+                cancel: 'रद्द करें',
+                alreadyVoted: 'पहले से वोट डाला गया',
+                vote: 'वोट करें',
+                notRegistered: 'पंजीकृत नहीं'
+            },
+            mr: {
+                title: 'डीवोट हॉरिझॉन',
+                subtitle: 'प्रत्येक ब्लॉकमध्ये लोकशाही',
+                walletConnection: 'वॉलेट कनेक्शन',
+                connectWallet: 'आपला वॉलेट कनेक्ट करा',
+                voterRegistration: 'मतदार नोंदणी',
+                voterNameLabel: 'मतदाराचे नाव:',
+                voterAddressLabel: 'मतदाराचा पत्ता:',
+                registerVoter: 'मतदार नोंदणी करा',
+                adminPanel: 'प्रशासक पॅनल',
+                candidateNameLabel: 'उमेदवाराचे नाव:',
+                addCandidate: 'उमेदवार जोडा',
+                castVote: 'आपला मत द्या',
+                registeredVoters: 'नोंदणीकृत मतदार',
+                refreshVoters: 'मतदार ताजेतवाने करा',
+                liveResults: 'लाइव्ह निकाल',
+                refreshResults: 'निकाल ताजेतवाने करा',
+                confirmVote: 'आपला मत पुष्टी करा',
+                confirm: 'पुष्टी करा',
+                cancel: 'रद्द करा',
+                alreadyVoted: 'आधीच मतदान केले आहे',
+                vote: 'मत द्या',
+                notRegistered: 'नोंदणीकृत नाही'
+            },
+            ta: {
+                title: 'டிவோட் ஹோரைசன்',
+                subtitle: 'ஒவ்வொரு பிளாக்கிலும் ஜனநாயகம்',
+                walletConnection: 'வாலட் இணைப்பு',
+                connectWallet: 'உங்கள் வாலட் இணைக்கவும்',
+                voterRegistration: 'வாக்காளர் பதிவு',
+                voterNameLabel: 'வாக்காளர் பெயர்:',
+                voterAddressLabel: 'வாக்காளர் முகவரி:',
+                registerVoter: 'வாக்காளரை பதிவு செய்',
+                adminPanel: 'நிர்வாகி பேனல்',
+                candidateNameLabel: 'வேட்பாளர் பெயர்:',
+                addCandidate: 'வேட்பாளரை சேர்',
+                castVote: 'உங்கள் வாக்கை செலுத்தவும்',
+                registeredVoters: 'பதிவு செய்யப்பட்ட வாக்காளர்கள்',
+                refreshVoters: 'வாக்காளர்களை புதுப்பிக்கவும்',
+                liveResults: 'லைவ் முடிவுகள்',
+                refreshResults: 'முடிவுகளை புதுப்பிக்கவும்',
+                confirmVote: 'உங்கள் வாக்கை உறுதிப்படுத்தவும்',
+                confirm: 'உறுதிப்படுத்தவும்',
+                cancel: 'ரத்து செய்',
+                alreadyVoted: 'ஏற்கனவே வாக்களித்துவிட்டீர்கள்',
+                vote: 'வாக்களி',
+                notRegistered: 'பதிவு செய்யப்படவில்லை'
+            }
+        };
+
+        function toggleLanguageDropdown() {
+            const dropdown = document.querySelector('.language-dropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            updateLanguage();
+            document.querySelector('.language-dropdown').style.display = 'none';
+        }
+
+        function updateLanguage() {
+            const t = translations[currentLanguage];
+            document.querySelector('.title').textContent = t.title;
+            document.querySelector('.subtitle').textContent = t.subtitle;
+            document.querySelector('#walletSection .container-title').textContent = t.walletConnection;
+            document.querySelector('#connectWallet').innerHTML = `<i class="fas fa-plug"></i> ${t.connectWallet}`;
+            document.querySelector('#voterRegistrationSection .container-title').textContent = t.voterRegistration;
+            document.querySelector('#voterRegistrationSection label[for="voterName"]').textContent = t.voterNameLabel;
+            document.querySelector('#voterRegistrationSection label[for="voterAddress"]').textContent = t.voterAddressLabel;
+            document.querySelector('#registerVoterBtn').innerHTML = `<i class="fas fa-user-plus"></i> ${t.registerVoter}`;
+            document.querySelector('#adminSection .container-title').textContent = t.adminPanel;
+            document.querySelector('#adminSection label').textContent = t.candidateNameLabel;
+            document.querySelector('#addCandidateBtn').innerHTML = `<i class="fas fa-plus-circle"></i> ${t.addCandidate}`;
+            document.querySelector('#votingSection .container-title').textContent = t.castVote;
+            document.querySelector('#votersSection .container-title').textContent = t.registeredVoters;
+            document.querySelector('#refreshVotersBtn').innerHTML = `<i class="fas fa-sync-alt"></i> ${t.refreshVoters}`;
+            document.querySelector('#resultsSection .container-title').textContent = t.liveResults;
+            document.querySelector('#refreshResultsBtn').innerHTML = `<i class="fas fa-sync-alt"></i> ${t.refreshResults}`;
+            document.querySelector('#voteModal h3').textContent = t.confirmVote;
+            document.querySelector('#voteModal .btn-primary').textContent = t.confirm;
+            document.querySelector('#voteModal .btn-success').textContent = t.cancel;
+
+            document.querySelectorAll('.vote-button').forEach(btn => {
+                if (btn.disabled && btn.classList.contains('already-voted')) {
+                    btn.innerHTML = `<i class="fas fa-lock"></i> ${t.alreadyVoted}`;
+                } else if (btn.disabled && btn.classList.contains('not-registered')) {
+                    btn.innerHTML = `<i class="fas fa-user-slash"></i> ${t.notRegistered}`;
+                } else {
+                    btn.innerHTML = `<i class="fas fa-vote-yea"></i> ${t.vote}`;
+                }
+            });
+        }
+
+        const contractAddress = "0x4382bf87fedb39c8b45f6aa8f29246fd9b81ec81";
+        const contractABI = [
+            "function owner() view returns (address)",
+            "function candidateCount() view returns (uint256)",
+            "function voterCount() view returns (uint256)",
+            "function hasVoted(address) view returns (bool)",
+            "function isVoterRegistered(address) view returns (bool)",
+            "function voters(address) view returns (string name, address voterAddress, bool isRegistered)",
+            "function candidates(uint256) view returns (string name, uint256 voteCount)",
+            "function addCandidate(string calldata) external",
+            "function vote(uint256) external",
+            "function registerVoter(string calldata, address) external",
+            "function getVoterDetails(address) view returns (string memory name, address voterAddress, bool isRegistered)",
+            "function getCandidateVotes(uint256) view returns (string memory name, uint256 voteCount)"
+        ];
+        
+        let provider;
+        let signer;
+        let contract;
+        let userAddress;
+        let isOwner = false;
+        let totalVotes = 0;
+        let selectedCandidateId = null;
+        let selectedCandidateName = '';
+        let registeredVoters = [];
+        
+        const connectWalletBtn = document.getElementById('connectWallet');
+        const connectedAddressElem = document.getElementById('connectedAddress');
+        const userAddressElem = document.getElementById('userAddress');
+        const networkInfoElem = document.getElementById('networkInfo');
+        const voterRegistrationSectionElem = document.getElementById('voterRegistrationSection');
+        const voterNameInput = document.getElementById('voterName');
+        const voterAddressInput = document.getElementById('voterAddress');
+        const registerVoterBtn = document.getElementById('registerVoterBtn');
+        const voterRegistrationStatusElem = document.getElementById('voterRegistrationStatus');
+        const adminSectionElem = document.getElementById('adminSection');
+        const votingSectionElem = document.getElementById('votingSection');
+        const votersSectionElem = document.getElementById('votersSection');
+        const votersListElem = document.getElementById('votersList');
+        const refreshVotersBtn = document.getElementById('refreshVotersBtn');
+        const resultsSectionElem = document.getElementById('resultsSection');
+        const candidatesListElem = document.getElementById('candidatesList');
+        const resultsListElem = document.getElementById('resultsList');
+        const candidateNameInput = document.getElementById('candidateName');
+        const addCandidateBtn = document.getElementById('addCandidateBtn');
+        const addCandidateStatusElem = document.getElementById('addCandidateStatus');
+        const votingStatusElem = document.getElementById('votingStatus');
+        const refreshResultsBtn = document.getElementById('refreshResultsBtn');
+        const toastElem = document.getElementById('toast');
+        const toastMessageElem = document.getElementById('toastMessage');
+        const voteModal = document.getElementById('voteModal');
+        const modalCandidateName = document.getElementById('modalCandidateName');
+        
+        function showToast(message, type = 'success') {
+            toastMessageElem.textContent = message;
+            toastElem.className = '';
+            toastElem.classList.add(`${type}-toast`);
+            toastElem.classList.add('show');
+            setTimeout(() => toastElem.classList.remove('show'), 5000);
+        }
+        
+        async function verifyContract() {
+            try {
+                const code = await provider.getCode(contractAddress);
+                if (code === '0x') {
+                    showToast('Contract not deployed at specified address', 'error');
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('Error checking contract:', error);
+                showToast('Error verifying contract: ' + error.message, 'error');
+                return false;
+            }
+        }
+
+        async function checkNetwork() {
+            const network = await provider.getNetwork();
+            if (network.chainId !== 11155111) {
+                showToast('Please connect to Sepolia testnet', 'error');
+                return false;
+            }
+            return true;
+        }
+
+        connectWalletBtn.addEventListener('click', async () => {
+            try {
+                if (!window.ethereum) {
+                    showToast('Please install MetaMask', 'error');
+                    return;
+                }
+
+                connectWalletBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+                connectWalletBtn.disabled = true;
+
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+                console.log('Connected wallet:', userAddress);
+
+                if (!await checkNetwork()) {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: '0xaa36a7' }],
+                    });
+                    return;
+                }
+
+                contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+                if (!await verifyContract()) {
+                    connectWalletBtn.innerHTML = '<i class="fas fa-plug"></i> Connect Wallet';
+                    connectWalletBtn.disabled = false;
+                    return;
+                }
+
+                const ownerAddress = await contract.owner();
+                isOwner = (ownerAddress.toLowerCase() === userAddress.toLowerCase());
+                console.log('Owner:', ownerAddress, 'Is Owner:', isOwner);
+
+                if (isOwner) {
+                    adminSectionElem.classList.remove('hidden');
+                    voterRegistrationSectionElem.classList.remove('hidden');
+                    votersSectionElem.classList.remove('hidden');
+                }
+
+                connectWalletBtn.classList.add('hidden');
+                connectedAddressElem.classList.remove('hidden');
+                userAddressElem.textContent = `${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}`;
+
+                const isRegistered = await contract.isVoterRegistered(userAddress);
+                if (isRegistered || isOwner) {
+                    votingSectionElem.classList.remove('hidden');
+                    resultsSectionElem.classList.remove('hidden');
+                    votersSectionElem.classList.remove('hidden');
+                    await loadCandidates();
+                    await loadResults();
+                    await loadVoters();
+                } else {
+                    votingSectionElem.classList.remove('hidden');
+                    await loadCandidates();
+                    showStatus(votingStatusElem, 'You need to be registered to vote. Contact the admin.', 'warning');
+                }
+
+                const hasVotedResult = await contract.hasVoted(userAddress);
+                if (hasVotedResult) {
+                    disableVoting();
+                    showStatus(votingStatusElem, 'You have already voted.', 'info');
+                }
+                showToast('Connected successfully!', 'success');
+
+            } catch (error) {
+                console.error('Connection error:', error);
+                showToast('Failed to connect: ' + error.message, 'error');
+                connectWalletBtn.innerHTML = '<i class="fas fa-plug"></i> Connect Wallet';
+                connectWalletBtn.disabled = false;
+            }
+        });
+
+        registerVoterBtn.addEventListener('click', async () => {
+            const voterName = voterNameInput.value.trim();
+            const voterAddress = voterAddressInput.value.trim();
+
+            if (!voterName) {
+                showStatus(voterRegistrationStatusElem, 'Please enter a voter name.', 'error');
+                return;
+            }
+            if (!voterAddress || !ethers.utils.isAddress(voterAddress)) {
+                showStatus(voterRegistrationStatusElem, 'Please enter a valid Ethereum address.', 'error');
+                return;
+            }
+
+            try {
+                if (!contract) {
+                    showStatus(voterRegistrationStatusElem, 'Please connect your wallet first.', 'error');
+                    return;
+                }
+
+                if (!isOwner) {
+                    showStatus(voterRegistrationStatusElem, 'Only the contract owner can register voters.', 'error');
+                    return;
+                }
+
+                const isRegistered = await contract.isVoterRegistered(voterAddress);
+                if (isRegistered) {
+                    showStatus(voterRegistrationStatusElem, `Voter at address ${voterAddress} is already registered.`, 'warning');
+                    return;
+                }
+
+                registerVoterBtn.disabled = true;
+                registerVoterBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+                showStatus(voterRegistrationStatusElem, 'Registering voter, please confirm the transaction...', 'info');
+
+                const tx = await contract.registerVoter(voterName, voterAddress);
+                await tx.wait();
+
+                console.log('Voter registered:', voterName, voterAddress);
+                registeredVoters.push(voterAddress.toLowerCase());
+                showStatus(voterRegistrationStatusElem, `Voter "${voterName}" (${voterAddress.substring(0, 6)}...) registered successfully!`, 'success');
+                showToast(`Voter "${voterName}" registered!`, 'success');
+
+                voterNameInput.value = '';
+                voterAddressInput.value = '';
+
+                await updateVotingSection(voterAddress);
+                await loadVoters();
+
+            } catch (error) {
+                console.error('Detailed error registering voter:', error.code, error.message, error.reason, error.data);
+                let errorMessage = 'Error registering voter: ';
+                if (error.code === 'ACTION_REJECTED') {
+                    errorMessage += 'Transaction rejected by user.';
+                } else if (error.code === 'CALL_EXCEPTION') {
+                    errorMessage += 'Transaction reverted: ' + (error.reason || 'Unknown reason');
+                } else {
+                    errorMessage += error.message;
+                }
+                showStatus(voterRegistrationStatusElem, errorMessage, 'error');
+                showToast('Failed to register voter', 'error');
+            } finally {
+                registerVoterBtn.disabled = false;
+                registerVoterBtn.innerHTML = `<i class="fas fa-user-plus"></i> ${translations[currentLanguage].registerVoter}`;
+            }
+        });
+
+        async function updateVotingSection(voterAddress) {
+            try {
+                console.log('Updating voting section for:', voterAddress);
+                const isRegistered = await contract.isVoterRegistered(voterAddress);
+                console.log('Is registered:', isRegistered);
+                
+                votingSectionElem.classList.remove('hidden');
+                resultsSectionElem.classList.remove('hidden');
+                votersSectionElem.classList.remove('hidden');
+
+                await loadCandidates();
+                await loadResults();
+
+                if (voterAddress.toLowerCase() === userAddress.toLowerCase()) {
+                    if (isRegistered) {
+                        const hasVoted = await contract.hasVoted(userAddress);
+                        console.log('Has voted:', hasVoted);
+                        if (!hasVoted) {
+                            showStatus(votingStatusElem, 'You are now registered and can vote!', 'success');
+                        } else {
+                            disableVoting();
+                            showStatus(votingStatusElem, 'You have already voted.', 'info');
+                        }
+                    } else {
+                        showStatus(votingStatusElem, 'You need to be registered to vote.', 'warning');
+                    }
+                } else {
+                    showStatus(votingStatusElem, 'Switch to the registered voter’s wallet to vote.', 'info');
+                }
+            } catch (error) {
+                console.error('Error updating voting section:', error);
+                showToast('Error updating voting section: ' + error.message, 'error');
+            }
+        }
+
+        addCandidateBtn.addEventListener('click', async () => {
+            const name = candidateNameInput.value.trim();
+            if (!name) {
+                showStatus(addCandidateStatusElem, 'Please enter a candidate name.', 'error');
+                return;
+            }
+            
+            try {
+                addCandidateBtn.disabled = true;
+                addCandidateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+                showStatus(addCandidateStatusElem, 'Adding candidate, please confirm the transaction...', 'info');
+                
+                const tx = await contract.addCandidate(name);
+                await tx.wait();
+                
+                showStatus(addCandidateStatusElem, `Candidate "${name}" added successfully!`, 'success');
+                showToast(`Candidate "${name}" added successfully!`, 'success');
+                candidateNameInput.value = '';
+                
+                await loadCandidates();
+                await loadResults();
+                
+            } catch (error) {
+                console.error('Error adding candidate:', error);
+                showStatus(addCandidateStatusElem, 'Error adding candidate: ' + error.message, 'error');
+                showToast('Error adding candidate', 'error');
+            } finally {
+                addCandidateBtn.disabled = false;
+                addCandidateBtn.innerHTML = `<i class="fas fa-plus-circle"></i> ${translations[currentLanguage].addCandidate}`;
+            }
+        });
+
+        function selectCandidate(candidateId) {
+            document.querySelectorAll('.candidate-card').forEach(card => {
+                card.classList.remove('card-selected');
+            });
+            
+            const card = document.getElementById(`candidate-${candidateId}`);
+            if (card) {
+                card.classList.add('card-selected');
+                selectedCandidateId = candidateId;
+                selectedCandidateName = card.querySelector('.candidate-name').textContent;
+                
+                document.querySelectorAll('.vote-button').forEach(btn => {
+                    if (btn.id === `vote-${candidateId}`) {
+                        btn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Vote';
+                        btn.classList.add('animate__animated', 'animate__pulse');
+                        btn.onclick = () => showVoteModal();
+                    } else {
+                        btn.innerHTML = `<i class="fas fa-vote-yea"></i> ${translations[currentLanguage].vote}`;
+                        btn.classList.remove('animate__animated', 'animate__pulse');
+                        btn.onclick = () => selectCandidate(parseInt(btn.id.replace('vote-', '')));
+                    }
+                });
+            }
+        }
+
+        function showVoteModal() {
+            modalCandidateName.textContent = selectedCandidateName;
+            voteModal.classList.add('show');
+        }
+
+        function closeModal() {
+            voteModal.classList.remove('show');
+        }
+
+        async function confirmVote() {
+            closeModal();
+            await submitVote();
+        }
+
+        async function submitVote() {
+            if (!selectedCandidateId) {
+                showStatus(votingStatusElem, 'Please select a candidate first.', 'warning');
+                return;
+            }
+            
+            try {
+                const isRegistered = await contract.isVoterRegistered(userAddress);
+                console.log('User registered for voting:', isRegistered);
+                if (!isRegistered) {
+                    showStatus(votingStatusElem, 'You must be a registered voter to cast a vote.', 'error');
+                    return;
+                }
+
+                const hasVoted = await contract.hasVoted(userAddress);
+                if (hasVoted) {
+                    showStatus(votingStatusElem, 'You have already voted.', 'info');
+                    disableVoting();
+                    return;
+                }
+
+                showStatus(votingStatusElem, 'Casting your vote, please confirm the transaction...', 'info');
+                document.querySelectorAll('.vote-button').forEach(btn => btn.disabled = true);
+                
+                const voteBtn = document.getElementById(`vote-${selectedCandidateId}`);
+                if (voteBtn) voteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                
+                const tx = await contract.vote(selectedCandidateId);
+                await tx.wait();
+                
+                showStatus(votingStatusElem, 'Your vote has been cast successfully!', 'success');
+                showToast('Vote cast successfully!', 'success');
+                
+                disableVoting();
+                await loadResults();
+                
+            } catch (error) {
+                console.error('Error voting:', error.code, error.message, error.reason, error.data);
+                showStatus(votingStatusElem, 'Error casting vote: ' + (error.reason || error.message), 'error');
+                showToast('Error casting vote', 'error');
+                
+                document.querySelectorAll('.vote-button').forEach(btn => {
+                    if (!btn.classList.contains('not-registered')) btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-vote-yea"></i> ${translations[currentLanguage].vote}`;
+                });
+            }
+        }
+
+        async function loadCandidates() {
+            try {
+                candidatesListElem.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i> Loading candidates...</div>';
+                
+                const count = await contract.candidateCount();
+                if (count.toNumber() === 0) {
+                    candidatesListElem.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-users-slash"></i>
+                            <p>No candidates added yet.</p>
+                            ${isOwner ? '<p>Add candidates using the admin panel above.</p>' : ''}
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let candidatesHTML = '';
+                totalVotes = 0;
+                
+                const isRegistered = await contract.isVoterRegistered(userAddress);
+                const hasVoted = await contract.hasVoted(userAddress);
+
+                for (let i = 1; i <= count; i++) {
+                    const [name, votes] = await contract.getCandidateVotes(i);
+                    totalVotes += votes.toNumber();
+                    
+                    const voteButtonDisabled = !isRegistered || hasVoted;
+                    const buttonClass = voteButtonDisabled ? (hasVoted ? 'already-voted' : 'not-registered') : '';
+                    const buttonText = hasVoted ? translations[currentLanguage].alreadyVoted : 
+                                     (!isRegistered ? translations[currentLanguage].notRegistered : translations[currentLanguage].vote);
+                    const buttonIcon = hasVoted ? 'fa-lock' : (!isRegistered ? 'fa-user-slash' : 'fa-vote-yea');
+
+                    candidatesHTML += `
+                        <div class="candidate-card" id="candidate-${i}">
+                            <div class="candidate-header">
+                                <h3 class="candidate-name">${name}</h3>
+                            </div>
+                            <div class="candidate-body">
+                                <button class="vote-button ${buttonClass}" id="vote-${i}" 
+                                        ${voteButtonDisabled ? 'disabled' : ''} 
+                                        onclick="${voteButtonDisabled ? '' : `selectCandidate(${i})`}">
+                                    <i class="fas ${buttonIcon}"></i> ${buttonText}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                candidatesListElem.innerHTML = candidatesHTML;
+                
+                if (!isRegistered) {
+                    showStatus(votingStatusElem, 'You need to be registered to vote.', 'warning');
+                } else if (hasVoted) {
+                    showStatus(votingStatusElem, 'You have already voted.', 'info');
+                } else {
+                    showStatus(votingStatusElem, 'Select a candidate to vote.', 'info');
+                }
+                
+            } catch (error) {
+                console.error('Error loading candidates:', error);
+                candidatesListElem.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading candidates: ${error.message}</p></div>`;
+            }
+        }
+
+        async function loadVoters() {
+            try {
+                votersListElem.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i> Loading voters...</div>';
+                
+                const voterCount = await contract.voterCount();
+                console.log('Total voters:', voterCount.toString());
+                
+                if (voterCount.toNumber() === 0) {
+                    votersListElem.innerHTML = `<div class="empty-state"><i class="fas fa-users-slash"></i><p>No voters registered yet.</p></div>`;
+                    return;
+                }
+                
+                let votersHTML = '';
+                for (const addr of registeredVoters) {
+                    const [name, voterAddress, isRegistered] = await contract.getVoterDetails(addr);
+                    console.log('Voter check:', addr, 'Registered:', isRegistered);
+                    if (isRegistered) {
+                        votersHTML += `
+                            <div class="voter-card">
+                                <div class="voter-header">
+                                    <h3 class="voter-name">${name}</h3>
+                                </div>
+                                <div class="voter-body">
+                                    <div class="voter-address">${voterAddress.substring(0, 6)}...${voterAddress.substring(voterAddress.length - 4)}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                votersListElem.innerHTML = votersHTML || `<div class="empty-state"><i class="fas fa-users"></i><p>No voters to display.</p></div>`;
+                
+            } catch (error) {
+                console.error('Error loading voters:', error);
+                votersListElem.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading voters: ${error.message}</p></div>`;
+            }
+        }
+
+        async function loadResults() {
+            try {
+                resultsListElem.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i> Loading results...</div>';
+                
+                const candidateCount = await contract.candidateCount();
+                if (candidateCount.toNumber() === 0) {
+                    resultsListElem.innerHTML = `<div class="empty-state"><i class="fas fa-chart-pie"></i><p>No candidates to show results for.</p></div>`;
+                    return;
+                }
+                
+                let resultsHTML = '';
+                totalVotes = 0;
+                
+                for (let i = 1; i <= candidateCount; i++) {
+                    const [name, votes] = await contract.getCandidateVotes(i);
+                    totalVotes += votes.toNumber();
+                }
+                
+                for (let i = 1; i <= candidateCount; i++) {
+                    const [name, votes] = await contract.getCandidateVotes(i);
+                    const voteCount = votes.toNumber();
+                    const percentage = totalVotes > 0 ? ((voteCount / totalVotes) * 100).toFixed(1) : 0;
+                    
+                    resultsHTML += `
+                        <div class="result-card">
+                            <div class="result-header">
+                                <h3 class="result-name">
+                                    ${name}
+                                    ${voteCount > 0 && totalVotes > 0 && percentage >= 40 ? 
+                                        '<span class="badge"><i class="fas fa-crown"></i> Leading</span>' : ''}
+                                </h3>
+                            </div>
+                            <div class="result-body">
+                                <div class="vote-count">${voteCount}</div>
+                                <div class="vote-percentage">${percentage}% of votes</div>
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: ${percentage}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                resultsListElem.innerHTML = resultsHTML;
+                
+            } catch (error) {
+                console.error('Error loading results:', error);
+                resultsListElem.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading results: ${error.message}</p></div>`;
+            }
+        }
+
+        function showStatus(element, message, type) {
+            element.textContent = message;
+            element.className = 'status ' + type;
+            element.classList.remove('hidden');
+        }
+
+        function disableVoting() {
+            document.querySelectorAll('.vote-button').forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('already-voted');
+                btn.innerHTML = `<i class="fas fa-lock"></i> ${translations[currentLanguage].alreadyVoted}`;
+            });
+        }
+
+        refreshResultsBtn.addEventListener('click', async () => {
+            refreshResultsBtn.disabled = true;
+            refreshResultsBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            await loadResults();
+            refreshResultsBtn.disabled = false;
+            refreshResultsBtn.innerHTML = `<i class="fas fa-sync-alt"></i> ${translations[currentLanguage].refreshResults}`;
+            showToast('Results refreshed', 'info');
+        });
+
+        refreshVotersBtn.addEventListener('click', async () => {
+            refreshVotersBtn.disabled = true;
+            refreshVotersBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            await loadVoters();
+            refreshVotersBtn.disabled = false;
+            refreshVotersBtn.innerHTML = `<i class="fas fa-sync-alt"></i> ${translations[currentLanguage].refreshVoters}`;
+            showToast('Voters list refreshed', 'info');
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateLanguage();
+            if (window.ethereum && window.ethereum.selectedAddress) {
+                connectWalletBtn.click();
+            }
+        });
+
+        if (window.ethereum) {
+            window.ethereum.on('chainChanged', (chainId) => {
+                if (parseInt(chainId, 16) !== 11155111) {
+                    showToast('Switched to an unsupported network. Please reconnect to Sepolia.', 'error');
+                    disconnectWallet();
+                } else {
+                    connectWalletBtn.click();
+                }
+            });
+
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    showToast('Wallet disconnected', 'warning');
+                    disconnectWallet();
+                } else {
+                    showToast('Account changed, reconnecting...', 'info');
+                    userAddress = accounts[0];
+                    connectWalletBtn.click();
+                }
+            });
+        }
+
+        function disconnectWallet() {
+            connectWalletBtn.classList.remove('hidden');
+            connectedAddressElem.classList.add('hidden');
+            adminSectionElem.classList.add('hidden');
+            voterRegistrationSectionElem.classList.add('hidden');
+            votingSectionElem.classList.add('hidden');
+            votersSectionElem.classList.add('hidden');
+            resultsSectionElem.classList.add('hidden');
+            connectWalletBtn.innerHTML = `<i class="fas fa-plug"></i> ${translations[currentLanguage].connectWallet}`;
+            connectWalletBtn.disabled = false;
+            userAddress = null;
+            isOwner = false;
+            provider = null;
+            signer = null;
+            contract = null;
+            registeredVoters = [];
+        }
+
+        document.addEventListener('click', (event) => {
+            const languageToggle = document.querySelector('.language-toggle');
+            const dropdown = document.querySelector('.language-dropdown');
+            if (!languageToggle.contains(event.target) && dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && voteModal.classList.contains('show')) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
